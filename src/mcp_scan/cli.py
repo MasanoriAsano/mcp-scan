@@ -291,6 +291,12 @@ def main():
         help="Opts out of sending unique a unique user identifier with every scan.",
     )
     scan_parser.add_argument(
+        "--local-only",
+        default=False,
+        action="store_true",
+        help="Skip all external server access during the scan.",
+    )
+    scan_parser.add_argument(
         "--include-built-in",
         default=False,
         action="store_true",
@@ -527,6 +533,7 @@ async def run_scan_inspect(mode="scan", args=None):
         and args.push_key
         and hasattr(args, "email")
         and hasattr(args, "opt_out")
+        and not getattr(args, "local_only", False)
     ):
         await upload(result, args.control_server, args.push_key, args.email, args.opt_out)
 
