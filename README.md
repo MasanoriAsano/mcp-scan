@@ -100,6 +100,8 @@ It then scans tool descriptions, both with local checks and by invoking Invarian
 
 Invariant Labs is collecting data for security research purposes (only about tool descriptions and how they change over time, not your user data). Don't use MCP-scan if you don't want to share your tools. Additionally, a unique, persistent, and anonymous ID is assigned to your scans for analysis. You can opt out of sending this information using the `--opt-out` flag.
 
+If you would like to skip all external network requests and perform only local checks, run the scan with the `--local-only` option. When this flag is used, the scan output highlights in red that no analysis server verification was performed.
+
 MCP-scan does not store or log any usage data, i.e. the contents and results of your MCP tool calls.
 
 ### Proxying
@@ -144,6 +146,7 @@ Options:
 --checks-per-server NUM       Number of checks to perform on each server (default: 1)
 --server-timeout SECONDS      Seconds to wait before timing out server connections (default: 10)
 --suppress-mcpserver-io BOOL  Suppress stdout/stderr from MCP servers (default: True)
+--local-only                  Skip all external server access during the scan
 ```
 
 #### proxy
