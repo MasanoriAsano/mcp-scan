@@ -1,0 +1,10 @@
+{
+	"servers": {
+		"SmartCard_spec": {
+			"type": "http",
+			"url": "https://192.168.10.61:9001/mcp"
+		}
+	},
+	"inputs": []
+	
+}
