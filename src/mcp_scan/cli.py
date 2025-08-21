@@ -100,6 +100,12 @@ def add_common_arguments(parser):
         default=False,
         help="Output results in JSON format instead of rich text",
     )
+    parser.add_argument(
+        "--no-ask-update",
+        action="store_true",
+        default=False,
+        help="Update stored results without confirmation even if warnings or errors are detected",
+    )
 
 
 def add_server_arguments(parser):
@@ -518,12 +524,14 @@ def main():
 async def run_scan_inspect(mode="scan", args=None):
     async with MCPScanner(**vars(args)) as scanner:
         # scanner.hook('path_scanned', print_path_scanned)
+        save_results = getattr(args, "no_ask_update", False)
         if mode == "scan":
-            result = await scanner.scan()
+            result = await scanner.scan(save_results=save_results)
         elif mode == "inspect":
-            result = await scanner.inspect()
+            result = await scanner.inspect(save_results=save_results)
         else:
             raise ValueError(f"Unknown mode: {mode}, expected 'scan' or 'inspect'")
+        storage_file = scanner.storage_file
 
     # upload scan result to control server if specified
     if (
@@ -537,12 +545,12 @@ async def run_scan_inspect(mode="scan", args=None):
     ):
         await upload(result, args.control_server, args.push_key, args.email, args.opt_out)
 
+    raw_result = result
     if args.json:
-        result = {r.path: r.model_dump(mode="json") for r in result}
-        print(json.dumps(result, indent=2))
+        print(json.dumps({r.path: r.model_dump(mode="json") for r in raw_result}, indent=2))
     else:
         print_scan_result(
-            result,
+            raw_result,
             args.print_errors,
             args.full_toxic_flows if hasattr(args, "full_toxic_flows") else False,
             mode == "inspect",
@@ -551,6 +559,20 @@ async def run_scan_inspect(mode="scan", args=None):
             rich.print(
                 "[bold red]This scan was run with --local-only; results have not been analyzed by the analysis server.[/bold red]"
             )
+
+    if not getattr(args, "no_ask_update", False):
+        has_warning = any(
+            r.error is not None
+            or any(s.error is not None for s in r.servers)
+            or any(issue.code.startswith(("W", "E")) for issue in r.issues)
+            for r in raw_result
+        )
+        if has_warning:
+            answer = input("Warnings or errors detected. Update stored scan results? (Y/N): ").strip().lower()
+            if answer in ["y", "yes"]:
+                storage_file.save()
+        else:
+            storage_file.save()
 
 
 if __name__ == "__main__":
