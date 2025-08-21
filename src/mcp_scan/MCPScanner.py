@@ -221,7 +221,7 @@ class MCPScanner:
         await self.emit("path_scanned", path_result)
         return path_result
 
-    async def scan(self) -> list[ScanPathResult]:
+    async def scan(self, save_results: bool = True) -> list[ScanPathResult]:
         logger.info("Starting scan of %d paths", len(self.paths))
         if self.context_manager is not None:
             self.context_manager.disable()
@@ -236,16 +236,18 @@ class MCPScanner:
             result = [self.scan_path(path) for path in self.paths]
             result_awaited = await asyncio.gather(*result)
 
-        logger.debug("Saving storage file")
-        self.storage_file.save()
+        if save_results:
+            logger.debug("Saving storage file")
+            self.storage_file.save()
         logger.info("Scan completed successfully")
         return result_awaited
 
-    async def inspect(self) -> list[ScanPathResult]:
+    async def inspect(self, save_results: bool = True) -> list[ScanPathResult]:
         logger.info("Starting inspection of %d paths", len(self.paths))
         result = [self.scan_path(path, inspect_only=True) for path in self.paths]
         result_awaited = await asyncio.gather(*result)
-        logger.debug("Saving storage file")
-        self.storage_file.save()
+        if save_results:
+            logger.debug("Saving storage file")
+            self.storage_file.save()
         logger.info("Inspection completed successfully")
         return result_awaited
