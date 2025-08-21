@@ -547,6 +547,10 @@ async def run_scan_inspect(mode="scan", args=None):
             args.full_toxic_flows if hasattr(args, "full_toxic_flows") else False,
             mode == "inspect",
         )
+        if getattr(args, "local_only", False):
+            rich.print(
+                "[bold red]This scan was run with --local-only; results have not been analyzed by the analysis server.[/bold red]"
+            )
 
 
 if __name__ == "__main__":
