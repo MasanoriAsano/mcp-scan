@@ -38,14 +38,14 @@ def _run_analyze(responses: list[str]) -> AnalysisServerResponse:
 
 def test_analyze_detects_prompt_injection():
     server.LLM_URL = "http://local-llm"
-    result = _run_analyze(["yes", "no", "no"])
+    result = _run_analyze(["no", "yes", "no", "no"])
     assert result == AnalysisServerResponse(
         issues=[Issue(code="E001", message="Tool poisoning, prompt injection.", reference=(0, 0))]
     )
 
 def test_analyze_detects_cross_server_interaction():
     server.LLM_URL = "http://local-llm"
-    result = _run_analyze(["no", "yes", "no"])
+    result = _run_analyze(["no", "no", "yes", "no"])
     assert result == AnalysisServerResponse(
         issues=[Issue(code="E002", message="Tool poisoning, cross server interaction.", reference=(0, 0))]
     )
@@ -53,7 +53,15 @@ def test_analyze_detects_cross_server_interaction():
 
 def test_analyze_detects_agent_hijacking():
     server.LLM_URL = "http://local-llm"
-    result = _run_analyze(["no", "no", "yes"])
+    result = _run_analyze(["no", "no", "no", "yes"])
     assert result == AnalysisServerResponse(
         issues=[Issue(code="E003", message="Tool poisoning, hijacking agent behavior.", reference=(0, 0))]
+    )
+
+
+def test_analyze_detects_suspicious_word():
+    server.LLM_URL = "http://local-llm"
+    result = _run_analyze(["yes", "no", "no", "no"])
+    assert result == AnalysisServerResponse(
+        issues=[Issue(code="W001", message="Tool poisoning, suspicious word used.", reference=(0, 0))]
     )
