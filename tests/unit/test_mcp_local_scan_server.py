@@ -43,18 +43,17 @@ def test_analyze_detects_prompt_injection():
         issues=[Issue(code="E001", message="Tool poisoning, prompt injection.", reference=(0, 0))]
     )
 
-
-def test_analyze_detects_secret_leak():
+def test_analyze_detects_cross_server_interaction():
     server.LLM_URL = "http://local-llm"
     result = _run_analyze(["no", "yes", "no"])
     assert result == AnalysisServerResponse(
-        issues=[Issue(code="E002", message="Sensitive data exfiltration.", reference=(0, 0))]
+        issues=[Issue(code="E002", message="Tool poisoning, cross server interaction.", reference=(0, 0))]
     )
 
 
-def test_analyze_detects_code_execution():
+def test_analyze_detects_agent_hijacking():
     server.LLM_URL = "http://local-llm"
     result = _run_analyze(["no", "no", "yes"])
     assert result == AnalysisServerResponse(
-        issues=[Issue(code="E003", message="Dangerous code execution request.", reference=(0, 0))]
+        issues=[Issue(code="E003", message="Tool poisoning, hijacking agent behavior.", reference=(0, 0))]
     )
