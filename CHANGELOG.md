@@ -28,3 +28,4 @@
 - `0.3.5` Improving description of some built-in IDE tools.
 - `0.3.6` Bug fix: tools without description were not working.
 - `0.3.7` Added `--local-only` option to skip external server access during scans.
+- `0.3.8` Detect cross-server references and agent hijacking in tool descriptions.
